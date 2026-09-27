@@ -1,0 +1,3 @@
+[submodule "hjson-js"]
+	path = hjson-js
+	url = git@github.com:Sam-Strand/hjson-js.git
