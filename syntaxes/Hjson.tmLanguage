@@ -34,12 +34,32 @@
   <key>name</key>
   <string>Hjson</string>
   <key>patterns</key>
-  <array>
+    <array>
     <dict>
-      <key>include</key>
-      <string>#objectContent</string>
+        <key>include</key>
+        <string>#comments</string>
     </dict>
-  </array>
+
+    <!-- root object without braces -->
+    <dict>
+        <key>begin</key>
+        <string>(?x)^(?=\s*(?:[^:,\{\}\[\]\s"']+|'[^']*'|"[^"]*")\s*:)</string>
+        <key>end</key>
+        <string>$</string>
+        <key>patterns</key>
+        <array>
+        <dict>
+            <key>include</key>
+            <string>#key</string>
+        </dict>
+        </array>
+    </dict>
+
+    <dict>
+        <key>include</key>
+        <string>#value</string>
+    </dict>
+    </array>
   <key>repository</key>
   <dict>
     <key>array</key>

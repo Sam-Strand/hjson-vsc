@@ -3,7 +3,7 @@
     "displayName": "hjson-vsc",
     "publisher": "Sam-Strand",
     "description": "format hjson",
-    "version": "1.0.5",
+    "version": "1.1.0",
     "license": "MIT",
     "engines": {
         "vscode": "^1.0.0"
@@ -120,6 +120,16 @@
                     "type": "boolean",
                     "default": false,
                     "description": "when serializing objects into hjson, order the keys based on their UTF-16 code units order"
+                },
+                "hjson-vsc.quoteChar": {
+                    "type": "string",
+                    "default": "\"",
+                    "enum": ["\"", "'"],
+                    "enumDescriptions": [
+                        "use double quotes for quoted keys and strings",
+                        "use single quotes for quoted keys and strings"
+                    ],
+                    "description": "controls which quote character is used when quoting. escaping follows the chosen character"
                 }
             }
         },

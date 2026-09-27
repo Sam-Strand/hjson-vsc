@@ -20,7 +20,8 @@ function getOptions() {
         space: config.get('space'),
         eol: config.get('eol'),
         colors: config.get('colors'),
-        serializeDeterministically: config.get('serializeDeterministically')
+        serializeDeterministically: config.get('serializeDeterministically'),
+        quoteChar: config.get('quoteChar')
     }
 
     output.info('getOptions: ' + JSON.stringify(formatOptions))
