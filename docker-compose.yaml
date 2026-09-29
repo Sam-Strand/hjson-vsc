@@ -3,8 +3,6 @@ services:
         build: .
         volumes:
             - .:/ext
-            - node-modules:/ext/node_modules
-            - npm-cache:/root/.npm
         working_dir: /ext
         stdin_open: true
         tty: true
