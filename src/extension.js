@@ -31,6 +31,125 @@ vscode.workspace.onDidChangeConfiguration(getOptions)
 
 getOptions()
 
+function addBracketFoldRanges(document, ranges) {
+    const stack = []
+
+    for (let lineIndex = 0; lineIndex < document.lineCount; lineIndex++) {
+        const line = document.lineAt(lineIndex).text
+        let i = 0
+
+        while (i < line.length) {
+            const ch = line[i]
+            const next = line[i + 1]
+
+            if (ch === '#' || (ch === '/' && next === '/')) {
+                break
+            }
+
+            if (ch === '/' && next === '*') {
+                let j = i + 2
+                while (j < line.length) {
+                    if (line[j] === '*' && line[j + 1] === '/') {
+                        break
+                    }
+                    j++
+                }
+                i = j + 2
+                continue
+            }
+
+            if (ch === "'" || ch === '"') {
+                const quote = ch
+                i++
+                while (i < line.length) {
+                    if (line[i] === '\\') {
+                        i += 2
+                        continue
+                    }
+                    if (line[i] === quote) {
+                        break
+                    }
+                    i++
+                }
+                i++
+                continue
+            }
+
+            if (ch === '{' || ch === '[') {
+                stack.push({ line: lineIndex, ch })
+            } else if (ch === '}' || ch === ']') {
+                const openChar = ch === '}' ? '{' : '['
+                const last = stack[stack.length - 1]
+
+                if (last && last.ch === openChar) {
+                    ranges.push(
+                        new vscode.FoldingRange(
+                            last.line,
+                            lineIndex,
+                            vscode.FoldingRangeKind.Region
+                        )
+                    )
+                    stack.pop()
+                }
+            }
+
+            i++
+        }
+    }
+}
+
+function addTripleQuoteFoldRanges(document, ranges) {
+    let blockStart = null
+
+    for (let i = 0; i < document.lineCount; i++) {
+        const line = document.lineAt(i).text
+
+        if (blockStart !== null) {
+            if (line.includes("'''")) {
+                ranges.push(
+                    new vscode.FoldingRange(
+                        blockStart,
+                        i,
+                        vscode.FoldingRangeKind.Region
+                    )
+                )
+                blockStart = null
+            }
+            continue
+        }
+
+        if (/^\s*'''/.test(line)) {
+            blockStart = i
+        }
+    }
+}
+
+function addBlockCommentFoldRanges(document, ranges) {
+    let blockStart = null
+
+    for (let i = 0; i < document.lineCount; i++) {
+        const line = document.lineAt(i).text
+
+        if (blockStart !== null) {
+            if (line.includes('*/')) {
+                ranges.push(
+                    new vscode.FoldingRange(
+                        blockStart,
+                        i,
+                        vscode.FoldingRangeKind.Comment
+                    )
+                )
+                blockStart = null
+            }
+            continue
+        }
+
+        if (/^\s*\/\*/.test(line)) {
+            blockStart = i
+        }
+    }
+}
+
 export function activate(context) {
     output.info('activate')
 
@@ -77,6 +196,18 @@ export function activate(context) {
         vscode.languages.registerDocumentFormattingEditProvider('hjson', {
             provideDocumentFormattingEdits(document, options, token) {
                 return format(document, options)
+            }
+        })
+    )
+
+    context.subscriptions.push(
+        vscode.languages.registerFoldingRangeProvider('hjson', {
+            provideFoldingRanges(document, context, token) {
+                const ranges = []
+                addBracketFoldRanges(document, ranges)
+                addTripleQuoteFoldRanges(document, ranges)
+                addBlockCommentFoldRanges(document, ranges)
+                return ranges
             }
         })
     )
